@@ -16,13 +16,16 @@ void Scheduler::push(Process *p) {
 }
 Process* Scheduler::pop() {
 	Process * p = runQ.front();
+
+	cout << "Pop: " << p->GetNum() << ' '  <<  runQ.back()->GetNum() << ' ' <<  runQ.size()  << endl;
 	runQ.pop();
 	return p;
 }
 Process* Scheduler::CurrentProcess() {
-//	cout << runQ.size() << endl;
-	if (!runQ.empty())
+	if (!runQ.empty()) {
+		cout << "Current: " << runQ.size() << ' ' << runQ.front()->GetNum() << endl;
 		return runQ.front();
+	}
 	else
 		return NULL;
 }

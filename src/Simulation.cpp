@@ -33,7 +33,9 @@ void Simulation::startSim (Scheduler * sched) {
 	int timeInPrevState;
 	bool CALL_SCHEDULER = false;
 	queue <Event *> eQ;
-	Event *evt = new Event(sched->get_next_process(), CREATED, READY, 0);
+	Process *proc = sched->get_next_process();
+//	Process *CURRENT_RUNNING_PROCESS = proc;
+	Event *evt = new Event(proc, CREATED, READY, proc->GetTimeStamp());
 	eQ.push(evt);
 
 	int cTime;
@@ -41,7 +43,7 @@ void Simulation::startSim (Scheduler * sched) {
 	while (!eQ.empty()) {
 		evt = eQ.front();
 		eQ.pop();
-		Process *proc = evt->evtProcess();
+		proc = evt->evtProcess();
 		CURRENT_TIME = evt->TimeStamp();
 		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
 
@@ -105,6 +107,7 @@ void Simulation::startSim (Scheduler * sched) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
+
 			if (sched->CurrentProcess() == NULL && eQ.empty() ) {
 				sched->push(sched->get_next_process());
 				if (sched->CurrentProcess() == NULL)

@@ -98,7 +98,7 @@ int main (int argc, char * argv[]) {
 		for (int i = 1; i < 4; i++) {
 			pch[i] = atoi(strtok(NULL, " "));
 		}
-		pch[4] = sim->myRandom(maxprio);
+		pch[4] = sim->myRandom(maxprio) - 1;
 		Process *p = new Process(pch);
 		pQ.push(p);
 	}
