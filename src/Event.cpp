@@ -10,11 +10,11 @@
 
 #include "Event.h"
 
-Event::Event(Process * p, int s, int time, int trans) {
-	state = s;
+Event::Event(Process * p, int os, int ns, int time) {
+	oldState = os;
+	newState = ns;
 	evt_ts = time;
 	evtProc = p;
-	transition = trans;
 }
 
 Process * Event::evtProcess() {
@@ -26,11 +26,11 @@ int Event::TimeStamp() {
 }
 
 int Event::Transition() {
-	return transition;
+	return newState;
 }
 
-int Event::GetState() {
-	return state;
+int Event::GetPrevState() {
+	return oldState;
 }
 
 #endif /* EVENT_CPP_ */

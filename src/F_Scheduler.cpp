@@ -15,6 +15,8 @@ void F_Scheduler::add_to_queue(Process *p) {
 	push(p);
 }
 
-Process* F_Scheduler::get_next_process() {
-	return pop();
-}
+//Process* F_Scheduler::get_next_process() {
+//	Process * p = allP->front();
+//	allP->pop();
+//	return p;
+//}

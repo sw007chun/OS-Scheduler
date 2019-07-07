@@ -8,26 +8,32 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
-typedef enum {STATE_CREATED, STATE_READY, STATE_RUNNING, STATE_BLOCKED} process_state_t;
-
 class Process {
 private:
-	int num;
-	int arrival;
-	int tCPU;
+	int num;	//Process #
+//	int arrival;	//arrival time
+	int tCPU;		//total CPU time
 	int CPU_Burst;
 	int IO_Burst;
-	int state_ts;
-	int totalCPU;
-	int totalIO;
-	int static_prio;
+	int state_ts;	//timestamp
+	int totalCPU;	//total CPU time till now
+	int totalIO;	//total IO time till now
+	int static_prio;	//static priority
 public:
 	Process (int input[]);
 	static int pNum;
-	int TimeStamp();
+//	int GetArrivalTime();
+	int GetTimeStamp();
+	void AddTime(int ts);
 	int GetNum();
 	int GetCPUBurst();
 	int GetIOBurst();
+	int GetRem();
+	int GetPrio();
+	int GetTotalCPU();
+	void AddCPUTime(int ct);
+	int GetTotalIO();
+	void AddIOTime(int it);
 };
 
 

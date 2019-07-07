@@ -20,10 +20,10 @@ int Simulation::myRandom (int burst) {
 
 const char * GetStateName (int state) {
 	switch (state) {
-	case STATE_CREATED: return "CREATED";
-	case STATE_READY: return "READY";
-	case STATE_RUNNING: return "RUNNG";
-	case STATE_BLOCKED: return "BLOCK";
+	case CREATED: return "CREATED";
+	case READY: return "READY";
+	case RUNNING: return "RUNNG";
+	case BLOCKED: return "BLOCK";
 	default: return "";
 	}
 }
@@ -31,59 +31,86 @@ const char * GetStateName (int state) {
 void Simulation::startSim (Scheduler * sched) {
 	int CURRENT_TIME = 0;
 	int timeInPrevState;
-	string from, to;
 	bool CALL_SCHEDULER = false;
-	bool add = false;
 	queue <Event *> eQ;
-	Event *evt = new Event(sched->get_next_process(), STATE_CREATED, 0, TRANS_TO_READY);
+	Event *evt = new Event(sched->get_next_process(), CREATED, READY, 0);
 	eQ.push(evt);
+
+	int cTime;
 
 	while (!eQ.empty()) {
 		evt = eQ.front();
 		eQ.pop();
 		Process *proc = evt->evtProcess();
 		CURRENT_TIME = evt->TimeStamp();
-		timeInPrevState = CURRENT_TIME - proc->TimeStamp();
-		from = GetStateName(evt->GetState());
+		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
+
+		cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " ;
 
 		switch(evt->Transition()) {
-		case TRANS_TO_READY:
-			eQ.push(new Event(proc, STATE_READY, CURRENT_TIME, TRANS_TO_RUN));
+		case READY:
+			if (evt->GetPrevState() == BLOCKED)
+				proc->AddIOTime(timeInPrevState);
+			eQ.push(new Event(proc, READY, RUNNING, CURRENT_TIME));
 			sched->push(proc);
 			CALL_SCHEDULER = true;
-			add = true;
-			to = "READY";
+			cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
 			break;
-		case TRANS_TO_RUN:
-			eQ.push(new Event(proc, STATE_RUNNING, CURRENT_TIME + myRandom(proc->GetCPUBurst()), TRANS_TO_BLOCK));
-			to = "RUNNG";
-			add = true;
+		case RUNNING:
+			cTime = myRandom(proc->GetCPUBurst());
+			if (cTime >= proc->GetRem()) {
+				cTime = proc->GetRem();
+				eQ.push(new Event(proc, RUNNING, DONE, CURRENT_TIME + cTime));
+			}
+			else {
+				eQ.push(new Event(proc, RUNNING, BLOCKED, CURRENT_TIME + cTime));
+			}
+			cout <<"READY -> RUNNG cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetPrio() << endl;
+			sched->pop();
+			CALL_SCHEDULER = false;
 			break;
-		case TRANS_TO_BLOCK:
-			eQ.push(new Event(proc, STATE_BLOCKED, CURRENT_TIME + myRandom(proc->GetIOBurst()), TRANS_TO_READY));
+		case BLOCKED:
+			cTime = myRandom(proc->GetIOBurst());
+			proc->AddCPUTime(timeInPrevState);
+			eQ.push(new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime));
 			CALL_SCHEDULER = true;
-			to = "BLOCK";
+			cout << "RUNNG -> BLOCK io=" << cTime << " rem=" << proc->GetRem() << endl;
 			break;
-		case TRANS_TO_PREEMPT:
+		case PREEMPT:
 			CALL_SCHEDULER = true;
-			to = "PREMPT";
+			break;
+		case DONE:
+			CALL_SCHEDULER = true;
+			cout << "DONE" << endl;
+//			sched->pop();
+//			proc = sched->CurrentProcess();
+//			cout << proc->GetNum() << endl;
 			break;
 		}
-		cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " << from << " -> " << to ;
-		if (add) {
-			cout << "cb=" << proc->GetCPUBurst() ;
-		}
-		cout << endl;
+//		if (add == 1) {
+//			cout << from << " -> " << to << " cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetPrio();
+//		} else if (add == 2) {
+//			cout << from << " -> " << to << " io=" << cTime << " rem=" << proc->GetRem();
+//		} else if (add == 3) {
+//			cout << "DONE" ;
+//		}
+//		cout << endl;
+//		add = 0;
 
 		delete evt;
 		evt = NULL;
 
 		if (CALL_SCHEDULER) {
-			if (eQ.front()->TimeStamp() == CURRENT_TIME) {
+			if (!eQ.empty() && eQ.front()->TimeStamp() == CURRENT_TIME) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
+			if (sched->CurrentProcess() == NULL && eQ.empty() ) {
+				sched->push(sched->get_next_process());
+				if (sched->CurrentProcess() == NULL)
+					continue;
+				eQ.push(new Event(sched->CurrentProcess(), CREATED, READY, sched->CurrentProcess()->GetTimeStamp()));
+			}
 		}
-
 	}
 }
