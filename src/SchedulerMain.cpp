@@ -98,7 +98,7 @@ int main (int argc, char * argv[]) {
 		for (int i = 1; i < 4; i++) {
 			pch[i] = atoi(strtok(NULL, " "));
 		}
-		pch[4] = sim->myRandom(maxprio) - 1;
+		pch[4] = sim->myRandom(maxprio);
 		Process *p = new Process(pch);
 		pQ.push(p);
 	}
@@ -106,13 +106,14 @@ int main (int argc, char * argv[]) {
 	Scheduler *scheduler;
 	switch (cvalue[0]) {
 	case 'F':
-		scheduler = new F_Scheduler(&pQ);
+//		scheduler = new F_Scheduler(&pQ);
+		scheduler = new F_Scheduler();
 		break;
 	default:
 		break;
 	}
 
-	sim->startSim(scheduler);
+	sim->startSim(scheduler, &pQ);
 
 	return 0;
 }

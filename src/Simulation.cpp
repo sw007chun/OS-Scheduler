@@ -28,21 +28,30 @@ const char * GetStateName (int state) {
 	}
 }
 
-void Simulation::startSim (Scheduler * sched) {
+void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
+	int *pSum[] = new int[inputQ->size()][10];
+	int *totalSum;
 	int CURRENT_TIME = 0;
 	int timeInPrevState;
 	bool CALL_SCHEDULER = false;
 	queue <Event *> eQ;
-	Process *proc = sched->get_next_process();
-//	Process *CURRENT_RUNNING_PROCESS = proc;
-	Event *evt = new Event(proc, CREATED, READY, proc->GetTimeStamp());
-	eQ.push(evt);
+	Process *proc; // = inputQ->front();
+	Process *CURRENT_RUNNING_PROCESS = NULL;
+	Event *evt; // = new Event(proc, CREATED, READY, proc->GetTimeStamp());
+//	eQ.push(evt);
+//	inputQ->pop();
 
 	int cTime;
 
-	while (!eQ.empty()) {
-		evt = eQ.front();
-		eQ.pop();
+	while (!eQ.empty() || !inputQ->empty()) {
+		if (eQ.empty() || (!inputQ->empty() &&  inputQ->front()->GetTimeStamp() <= eQ.front()->TimeStamp())) {
+			evt = new Event(inputQ->front(), CREATED, READY, inputQ->front()->GetTimeStamp());
+			inputQ->pop();
+		} else {
+			evt = eQ.front();
+			eQ.pop();
+		}
+
 		proc = evt->evtProcess();
 		CURRENT_TIME = evt->TimeStamp();
 		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
@@ -53,51 +62,45 @@ void Simulation::startSim (Scheduler * sched) {
 		case READY:
 			if (evt->GetPrevState() == BLOCKED)
 				proc->AddIOTime(timeInPrevState);
-			eQ.push(new Event(proc, READY, RUNNING, CURRENT_TIME));
-			sched->push(proc);
+//			eQ.push(new Event(proc, READY, RUNNING, CURRENT_TIME));
 			CALL_SCHEDULER = true;
 			cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
+			sched->push(proc);
 			break;
 		case RUNNING:
 			cTime = myRandom(proc->GetCPUBurst());
-			if (cTime >= proc->GetRem()) {
-				cTime = proc->GetRem();
-				eQ.push(new Event(proc, RUNNING, DONE, CURRENT_TIME + cTime));
-			}
-			else {
+
+			if (cTime >= proc->GetRem())
+				eQ.push(new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem()));
+			else
 				eQ.push(new Event(proc, RUNNING, BLOCKED, CURRENT_TIME + cTime));
-			}
-			cout <<"READY -> RUNNG cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetPrio() << endl;
-			sched->pop();
+
+			CURRENT_RUNNING_PROCESS = proc;
 			CALL_SCHEDULER = false;
+
+			cout <<"READY -> RUNNG cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetPrio() << endl;
+
 			break;
 		case BLOCKED:
 			cTime = myRandom(proc->GetIOBurst());
 			proc->AddCPUTime(timeInPrevState);
 			eQ.push(new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime));
+
+			CURRENT_RUNNING_PROCESS = NULL;
 			CALL_SCHEDULER = true;
+
 			cout << "RUNNG -> BLOCK io=" << cTime << " rem=" << proc->GetRem() << endl;
+
 			break;
 		case PREEMPT:
 			CALL_SCHEDULER = true;
 			break;
 		case DONE:
 			CALL_SCHEDULER = true;
+			CURRENT_RUNNING_PROCESS = NULL;
 			cout << "DONE" << endl;
-//			sched->pop();
-//			proc = sched->CurrentProcess();
-//			cout << proc->GetNum() << endl;
 			break;
 		}
-//		if (add == 1) {
-//			cout << from << " -> " << to << " cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetPrio();
-//		} else if (add == 2) {
-//			cout << from << " -> " << to << " io=" << cTime << " rem=" << proc->GetRem();
-//		} else if (add == 3) {
-//			cout << "DONE" ;
-//		}
-//		cout << endl;
-//		add = 0;
 
 		delete evt;
 		evt = NULL;
@@ -107,13 +110,16 @@ void Simulation::startSim (Scheduler * sched) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
-
-			if (sched->CurrentProcess() == NULL && eQ.empty() ) {
-				sched->push(sched->get_next_process());
-				if (sched->CurrentProcess() == NULL)
+//			cout << CURRENT_RUNNING_PROCESS << ' ' << eQ.empty() << endl;
+			if (CURRENT_RUNNING_PROCESS == NULL && eQ.empty() ) {
+				CURRENT_RUNNING_PROCESS = sched->get_next_process();
+				if (CURRENT_RUNNING_PROCESS == NULL)
 					continue;
-				eQ.push(new Event(sched->CurrentProcess(), CREATED, READY, sched->CurrentProcess()->GetTimeStamp()));
+				eQ.push(new Event(CURRENT_RUNNING_PROCESS, READY, RUNNING, CURRENT_TIME));
+//				eQ.push(new Event(CURRENT_RUNNING_PROCESS, CREATED, READY, sched->CurrentProcess()->GetTimeStamp()));
 			}
 		}
 	}
+
+
 }

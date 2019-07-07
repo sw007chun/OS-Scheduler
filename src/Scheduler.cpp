@@ -8,17 +8,17 @@
 #include "Scheduler.h"
 
 
-Scheduler::Scheduler (queue <Process *> *pQ) : allP(pQ) {
-
-};
+//Scheduler::Scheduler (queue <Process *> *pQ) : allP(pQ) {
+//
+//};
 void Scheduler::push(Process *p) {
 	runQ.push(p);
+//	cout << "Push: " << p->GetNum() << ' '  <<  runQ.size()  <<  ' ' <<  runQ.front()->GetNum() << endl;
 }
 Process* Scheduler::pop() {
 	Process * p = runQ.front();
-
-	cout << "Pop: " << p->GetNum() << ' '  <<  runQ.back()->GetNum() << ' ' <<  runQ.size()  << endl;
 	runQ.pop();
+//	cout << "Pop: " << p->GetNum() << ' ' <<  runQ.size()  << endl;
 	return p;
 }
 Process* Scheduler::CurrentProcess() {
@@ -31,14 +31,20 @@ Process* Scheduler::CurrentProcess() {
 }
 
 Process* Scheduler::get_next_process() {
-	Process * p = allP->front();
-	allP->pop();
-	return p;
+//	Process * p;
+	if (!runQ.empty()) {
+//		p = runQ.front();
+//		runQ.pop();
+		return pop();
+	} else
+		return NULL;
 }
 
-int Scheduler::Get_Next_Process_Arrival() {
-	return allP->front()->GetTimeStamp();
-}
+//Process* Scheduler::Get_New_Process() {
+//	Process * p = allP->front();
+//	allP->pop();
+//	return p;
+//}
 
 //Scheduler::~Scheduler() {
 //	delete runQ;

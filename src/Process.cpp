@@ -19,6 +19,7 @@ Process::Process (int input[]) {
 	totalCPU = 0;
 	totalIO = 0;
 	static_prio = input[4];
+	dyn_prio = static_prio - 1;
 	cout << state_ts << " " << tCPU << " " << CPU_Burst << " " << IO_Burst << endl;
 }
 
@@ -44,7 +45,7 @@ int Process::GetRem() {
 	return tCPU - totalCPU;
 }
 int Process::GetPrio() {
-	return static_prio;
+	return dyn_prio;
 }
 int Process::GetTotalCPU() {
 	return totalCPU;

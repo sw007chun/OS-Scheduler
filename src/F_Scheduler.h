@@ -12,7 +12,7 @@
 
 class F_Scheduler : public Scheduler {
 public:
-	F_Scheduler(queue<Process *> *pQ);
+//	F_Scheduler();
 	void add_to_queue(Process *p);
 	Process* get_next_process();
 };

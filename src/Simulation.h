@@ -17,7 +17,7 @@ private:
 	int ofs;
 public:
 	Simulation(int * rand);
-	void startSim(Scheduler * sched);
+	void startSim(Scheduler * sched, queue <Process *> *inputQ);
 	int myRandom (int burst);
 };
 

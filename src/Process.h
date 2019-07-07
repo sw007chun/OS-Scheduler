@@ -19,6 +19,7 @@ private:
 	int totalCPU;	//total CPU time till now
 	int totalIO;	//total IO time till now
 	int static_prio;	//static priority
+	int dyn_prio;
 public:
 	Process (int input[]);
 	static int pNum;
