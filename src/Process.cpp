@@ -11,21 +11,21 @@ using namespace std;
 
 Process::Process (int input[]) {
 	num = pNum++;
+	arrival = input[0];
 	state_ts = input[0];
 	tCPU = input[1];
 	CPU_Burst = input[2];
 	IO_Burst = input[3];
-//	state_ts = 0;
 	totalCPU = 0;
 	totalIO = 0;
 	static_prio = input[4];
 	dyn_prio = static_prio - 1;
-	cout << state_ts << " " << tCPU << " " << CPU_Burst << " " << IO_Burst << endl;
+//	cout << state_ts << " " << tCPU << " " << CPU_Burst << " " << IO_Burst << endl;
 }
 
-//int Process::GetArrivalTime() {
-//	return arrival;
-//}
+int Process::GetArrivalTime() {
+	return arrival;
+}
 int Process::GetTimeStamp() {
 	return state_ts;
 }
@@ -44,11 +44,14 @@ int Process::GetIOBurst() {
 int Process::GetRem() {
 	return tCPU - totalCPU;
 }
-int Process::GetPrio() {
+int Process::GetStatPrio() {
+	return static_prio;
+}
+int Process::GetDynPrio() {
 	return dyn_prio;
 }
 int Process::GetTotalCPU() {
-	return totalCPU;
+	return tCPU;
 }
 void Process::AddCPUTime(int ct) {
 	totalCPU += ct;

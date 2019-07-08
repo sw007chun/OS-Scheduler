@@ -11,7 +11,7 @@
 class Process {
 private:
 	int num;	//Process #
-//	int arrival;	//arrival time
+	int arrival;	//arrival time
 	int tCPU;		//total CPU time
 	int CPU_Burst;
 	int IO_Burst;
@@ -23,14 +23,15 @@ private:
 public:
 	Process (int input[]);
 	static int pNum;
-//	int GetArrivalTime();
+	int GetArrivalTime();
 	int GetTimeStamp();
 	void AddTime(int ts);
 	int GetNum();
 	int GetCPUBurst();
 	int GetIOBurst();
 	int GetRem();
-	int GetPrio();
+	int GetStatPrio();
+	int GetDynPrio();
 	int GetTotalCPU();
 	void AddCPUTime(int ct);
 	int GetTotalIO();

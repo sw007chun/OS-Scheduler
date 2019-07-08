@@ -8,9 +8,9 @@
 #include "Scheduler.h"
 
 
-//Scheduler::Scheduler (queue <Process *> *pQ) : allP(pQ) {
-//
-//};
+Scheduler::Scheduler (char * st) : sType(st) {
+
+};
 void Scheduler::push(Process *p) {
 	runQ.push(p);
 //	cout << "Push: " << p->GetNum() << ' '  <<  runQ.size()  <<  ' ' <<  runQ.front()->GetNum() << endl;
@@ -38,6 +38,10 @@ Process* Scheduler::get_next_process() {
 		return pop();
 	} else
 		return NULL;
+}
+
+char* Scheduler::Get_SType() {
+	return sType;
 }
 
 //Process* Scheduler::Get_New_Process() {

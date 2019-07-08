@@ -9,6 +9,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <cstring>
+#include <cstdlib>
 #include <queue>
 #include "Process.h"
 #include "Scheduler.h"
@@ -78,12 +79,12 @@ int main (int argc, char * argv[]) {
 	}
 
 	getline(rFile, readline);
-	int rIndex = stoi(readline);
+	int rIndex = atoi(readline.c_str());
 	int * rand = new int[rIndex];
 
 	for (int i = 0; i < rIndex; i++) {
 		getline(rFile, readline);
-		rand[i] = stoi(readline);
+		rand[i] = atoi(readline.c_str());
 	}
 
 	Simulation * sim = new Simulation(rand);
