@@ -15,6 +15,7 @@
 #include "Scheduler.h"
 #include "F_Scheduler.h"
 #include "L_Scheduler.h"
+#include "S_Scheduler.h"
 #include "Simulation.h"
 using namespace std;
 
@@ -112,6 +113,9 @@ int main (int argc, char * argv[]) {
 		break;
 	case 'L':
 		scheduler = new L_Scheduler();
+		break;
+	case 'S':
+		scheduler = new S_Scheduler();
 		break;
 	default:
 		break;
