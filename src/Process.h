@@ -13,7 +13,8 @@ private:
 	int num;	//Process #
 	int arrival;	//arrival time
 	int tCPU;		//total CPU time
-	int CPU_Burst;
+	int max_CPU_Burst;
+	int leftCPU_Burst;
 	int IO_Burst;
 	int state_ts;	//timestamp
 	int totalCPU;	//total CPU time till now
@@ -28,6 +29,9 @@ public:
 	void AddTime(int ts);
 	int GetNum();
 	int GetCPUBurst();
+	void SetCPUBurst(int cpu);
+	void ReduceCPUBurst(int quantum);
+	int GetLeftCPUBurst();
 	int GetIOBurst();
 	int GetRem();
 	int GetStatPrio();

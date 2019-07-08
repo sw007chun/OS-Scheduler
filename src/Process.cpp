@@ -14,7 +14,8 @@ Process::Process (int input[]) {
 	arrival = input[0];
 	state_ts = input[0];
 	tCPU = input[1];
-	CPU_Burst = input[2];
+	max_CPU_Burst = input[2];
+	leftCPU_Burst = 0;
 	IO_Burst = input[3];
 	totalCPU = 0;
 	totalIO = 0;
@@ -36,7 +37,16 @@ int Process::GetNum() {
 	return num;
 }
 int Process::GetCPUBurst() {
-	return CPU_Burst;
+	return max_CPU_Burst;
+}
+void Process::SetCPUBurst(int cpu) {
+	leftCPU_Burst = cpu;
+}
+void Process::ReduceCPUBurst(int quantum) {
+	leftCPU_Burst -= quantum;
+}
+int Process::GetLeftCPUBurst() {
+	return leftCPU_Burst;
 }
 int Process::GetIOBurst() {
 	return IO_Burst;

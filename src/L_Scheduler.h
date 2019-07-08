@@ -15,7 +15,7 @@ class L_Scheduler : public Scheduler {
 private:
 	 stack <Process *> runQ;
 public:
-	L_Scheduler();
+	L_Scheduler(int q);
 	~L_Scheduler() {};
 	void add_to_queue(Process *p);
 	Process* get_next_process();

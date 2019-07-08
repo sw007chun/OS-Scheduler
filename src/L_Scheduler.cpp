@@ -8,7 +8,7 @@
 
 #include "L_Scheduler.h"
 
-L_Scheduler::L_Scheduler() : Scheduler("LCFS") {
+L_Scheduler::L_Scheduler(int q) : Scheduler("LCFS", q) {
 
 }
 

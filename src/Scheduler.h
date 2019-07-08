@@ -16,14 +16,16 @@ class Scheduler {
 private:
 //	queue <Process *> runQ;
 	string sType;
+	int quantum;
 public:
-	Scheduler (string st);
+	Scheduler (string st, int q);
 //	void push(Process *p);
 //	Process* pop();
 	virtual ~Scheduler() { };
 	virtual void add_to_queue(Process *p) = 0;
 	virtual Process* get_next_process() = 0;
-	string Get_SType();
+	void Print_SType();
+	int Get_Quantum();
 
 };
 

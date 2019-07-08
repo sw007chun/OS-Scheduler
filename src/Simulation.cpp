@@ -68,10 +68,10 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 		proc = evt->evtProcess();
 		CURRENT_TIME = evt->TimeStamp();
 		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
+		if (evt->GetPrevState() != PREEMPT)
+			cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " ;
 
-		cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " ;
-
-		switch(evt->Transition()) {
+  		switch(evt->Transition()) {
 		case READY:
 			if (evt->GetPrevState() == BLOCKED) {
 				proc->AddIOTime(timeInPrevState);
@@ -81,26 +81,39 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			}
 
 			CALL_SCHEDULER = true;
-			cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
+			if (evt->GetPrevState() != PREEMPT)
+//				cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
+//			else
+				cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
+
 			sched->add_to_queue(proc);
+
 			break;
 		case RUNNING:
 			proc->AddTime(timeInPrevState);
-			cTime = myRandom(proc->GetCPUBurst());
-			if (cTime >= proc->GetRem()) {
-				cTime = proc->GetRem();
-				nEvt = new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem());
+			if (proc->GetLeftCPUBurst() == 0) {
+				cTime = myRandom(proc->GetCPUBurst());
+				cTime = (cTime > proc->GetRem()) ? proc->GetRem() : cTime;
+				proc->SetCPUBurst(cTime);
 			}
+			else
+				cTime = proc->GetLeftCPUBurst();
+
+			if (cTime > sched->Get_Quantum())
+				nEvt = new Event(proc, RUNNING, PREEMPT, CURRENT_TIME + sched->Get_Quantum());
+			else if (cTime == proc->GetRem())
+				nEvt = new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem());
 			else
 				nEvt = new Event(proc, RUNNING, BLOCKED, CURRENT_TIME + cTime);
 
 			orderedPush(&eQ, nEvt);
 			CURRENT_RUNNING_PROCESS = proc;
 			CALL_SCHEDULER = false;
-			cout <<"READY -> RUNNG cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
+			cout <<"READY -> RUNNG cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
 			break;
 		case BLOCKED:
 			proc->AddCPUTime(timeInPrevState);
+			proc->SetCPUBurst(0);
 			if (ioState == 0)
 				ioStart_ts = CURRENT_TIME;
 			ioState++;
@@ -113,7 +126,13 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			cout << "RUNNG -> BLOCK  ib=" << cTime << " rem=" << proc->GetRem() << endl;
 			break;
 		case PREEMPT:
+			proc->AddCPUTime(timeInPrevState);
+			proc->ReduceCPUBurst(timeInPrevState);
+			nEvt = new Event(proc, PREEMPT, READY, CURRENT_TIME);
+			orderedPush(&eQ, nEvt);
 			CALL_SCHEDULER = true;
+			CURRENT_RUNNING_PROCESS = NULL;
+			cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
 			break;
 		case DONE:
 			proc->AddCPUTime(timeInPrevState);
@@ -142,7 +161,7 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 		}
 	}
 
-	cout << sched->Get_SType() << endl;
+	sched->Print_SType();
 
 	for (int i = 0; i < inputSize ; i++ ) {
 		cout << setw(4) << setfill('0') << pSum[i]->GetNum() <<":";

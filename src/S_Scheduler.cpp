@@ -7,7 +7,7 @@
 
 #include "S_Scheduler.h"
 
-S_Scheduler::S_Scheduler() : Scheduler("SRTF") {
+S_Scheduler::S_Scheduler(int q) : Scheduler("SRTF", q) {
 
 }
 

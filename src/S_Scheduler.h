@@ -15,7 +15,7 @@ class S_Scheduler : public Scheduler {
 private:
 	 list <Process *> runQ;
 public:
-	S_Scheduler();
+	S_Scheduler(int q);
 	~S_Scheduler() {};
 	void add_to_queue(Process *p);
 	Process* get_next_process();

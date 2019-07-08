@@ -8,13 +8,18 @@
 #include "Scheduler.h"
 
 
-Scheduler::Scheduler (string st) : sType(st) {
+Scheduler::Scheduler (string st, int q) : sType(st), quantum(q) {
 
 }
-string Scheduler::Get_SType() {
-	return sType;
+void Scheduler::Print_SType() {
+	cout << sType;
+	if (sType =="RR" || sType =="PRIO" || sType == "PREPRIO" )
+		cout << ' ' << quantum ;
+	cout << endl;
 }
-
+int Scheduler::Get_Quantum() {
+	return quantum;
+}
 //Process* Scheduler::CurrentProcess() {
 //	if (!runQ.empty()) {
 //		cout << "Current: " << runQ.size() << ' ' << runQ.front()->GetNum() << endl;

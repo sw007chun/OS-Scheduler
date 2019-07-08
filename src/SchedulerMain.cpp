@@ -16,6 +16,7 @@
 #include "F_Scheduler.h"
 #include "L_Scheduler.h"
 #include "S_Scheduler.h"
+#include "R_Scheduler.h"
 #include "Simulation.h"
 using namespace std;
 
@@ -109,13 +110,16 @@ int main (int argc, char * argv[]) {
 	Scheduler *scheduler;
 	switch (cvalue[0]) {
 	case 'F':
-		scheduler = new F_Scheduler();
+		scheduler = new F_Scheduler(quantum);
 		break;
 	case 'L':
-		scheduler = new L_Scheduler();
+		scheduler = new L_Scheduler(quantum);
 		break;
 	case 'S':
-		scheduler = new S_Scheduler();
+		scheduler = new S_Scheduler(quantum);
+		break;
+	case 'R':
+		scheduler = new R_Scheduler(quantum);
 		break;
 	default:
 		break;
