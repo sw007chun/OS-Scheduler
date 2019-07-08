@@ -9,7 +9,6 @@
 #define L_SCHEDULER_H_
 
 #include "Scheduler.h"
-#include <stack>
 
 class L_Scheduler : public Scheduler {
 private:

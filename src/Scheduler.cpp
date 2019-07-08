@@ -17,6 +17,10 @@ void Scheduler::Print_SType() {
 		cout << ' ' << quantum ;
 	cout << endl;
 }
+string Scheduler::Get_SType() {
+	return sType;
+}
+
 int Scheduler::Get_Quantum() {
 	return quantum;
 }

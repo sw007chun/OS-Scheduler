@@ -9,7 +9,6 @@
 #define F_SCHEDULER_H_
 
 #include "Scheduler.h"
-#include <queue>
 
 class F_Scheduler : public Scheduler {
 private:

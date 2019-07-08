@@ -40,6 +40,8 @@ public:
 	void AddCPUTime(int ct);
 	int GetTotalIO();
 	void AddIOTime(int it);
+	void Reduce_Prio();
+	void Reset_Prio();
 };
 
 

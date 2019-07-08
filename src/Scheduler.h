@@ -9,6 +9,9 @@
 #define SCHEDULER_H_
 
 #include <iostream>
+#include <list>
+#include <queue>
+#include <stack>
 #include "Process.h"
 using namespace std;
 
@@ -25,6 +28,7 @@ public:
 	virtual void add_to_queue(Process *p) = 0;
 	virtual Process* get_next_process() = 0;
 	void Print_SType();
+	string Get_SType();
 	int Get_Quantum();
 
 };

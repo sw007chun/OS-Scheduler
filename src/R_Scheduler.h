@@ -9,7 +9,6 @@
 #define R_SCHEDULER_H_
 
 #include "Scheduler.h"
-#include <queue>
 
 class R_Scheduler : public Scheduler {
 private:

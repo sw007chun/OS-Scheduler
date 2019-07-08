@@ -74,3 +74,9 @@ void Process::AddIOTime(int it) {
 	totalIO += it;
 	AddTime(it);
 }
+void Process::Reduce_Prio() {
+	dyn_prio--;
+}
+void Process::Reset_Prio() {
+	dyn_prio = static_prio - 1;
+}

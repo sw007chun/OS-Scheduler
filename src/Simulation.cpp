@@ -74,6 +74,7 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
   		switch(evt->Transition()) {
 		case READY:
 			if (evt->GetPrevState() == BLOCKED) {
+				proc->Reset_Prio();
 				proc->AddIOTime(timeInPrevState);
 				ioState--;
 				if (ioState == 0)
@@ -99,8 +100,9 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			else
 				cTime = proc->GetLeftCPUBurst();
 
-			if (cTime > sched->Get_Quantum())
+			if (cTime > sched->Get_Quantum()) {
 				nEvt = new Event(proc, RUNNING, PREEMPT, CURRENT_TIME + sched->Get_Quantum());
+			}
 			else if (cTime == proc->GetRem())
 				nEvt = new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem());
 			else
@@ -133,6 +135,8 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			CALL_SCHEDULER = true;
 			CURRENT_RUNNING_PROCESS = NULL;
 			cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
+			if (sched->Get_SType() == "PRIO" ||  sched->Get_SType() == "PREPRIO" )
+				proc->Reduce_Prio();
 			break;
 		case DONE:
 			proc->AddCPUTime(timeInPrevState);
@@ -150,7 +154,6 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
-//			cout << CURRENT_RUNNING_PROCESS << ' ' << eQ.empty() << endl;
 			if (CURRENT_RUNNING_PROCESS == NULL ) {
 				CURRENT_RUNNING_PROCESS = sched->get_next_process();
 				if (CURRENT_RUNNING_PROCESS == NULL)

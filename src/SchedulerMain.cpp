@@ -17,6 +17,7 @@
 #include "L_Scheduler.h"
 #include "S_Scheduler.h"
 #include "R_Scheduler.h"
+#include "P_Scheduler.h"
 #include "Simulation.h"
 using namespace std;
 
@@ -120,6 +121,9 @@ int main (int argc, char * argv[]) {
 		break;
 	case 'R':
 		scheduler = new R_Scheduler(quantum);
+		break;
+	case 'P':
+		scheduler = new P_Scheduler(quantum);
 		break;
 	default:
 		break;

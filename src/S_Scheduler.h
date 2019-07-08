@@ -9,7 +9,6 @@
 #define S_SCHEDULER_H_
 
 #include "Scheduler.h"
-#include <list>
 
 class S_Scheduler : public Scheduler {
 private:
