@@ -9,7 +9,6 @@
 #include "Scheduler.h"
 #include "Event.h"
 #include <iomanip>
-#include <list>
 
 Simulation::Simulation(int * rand) {
 	randvals = rand;
@@ -48,17 +47,12 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 	int CURRENT_TIME = 0;
 	int timeInPrevState;
 	bool CALL_SCHEDULER = false;
-	int ioState = 0;
-	int ioStart_ts = 0;
-	int totalIO = 0;
-//	queue <Event *> eQ;
+	int ioState = 0, ioStart_ts = 0, totalIO = 0; //counters for at least one IO running time
 	list <Event *> eQ;
-	Process *proc; // = inputQ->front();
+	Process *proc;
 	Process *CURRENT_RUNNING_PROCESS = NULL;
-	Event *evt; // = new Event(proc, CREATED, READY, proc->GetTimeStamp());
-	Event *nEvt; // new Event
-//	eQ.push(evt);
-//	inputQ->pop();
+	Event *evt; // current event
+	Event *nEvt; // newly added Event
 
 	int cTime;
 
@@ -86,10 +80,9 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 					totalIO += CURRENT_TIME - ioStart_ts;
 			}
 
-//			eQ.push(new Event(proc, READY, RUNNING, CURRENT_TIME));
 			CALL_SCHEDULER = true;
 			cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
-			sched->push(proc);
+			sched->add_to_queue(proc);
 			break;
 		case RUNNING:
 			proc->AddTime(timeInPrevState);
@@ -97,20 +90,14 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			if (cTime >= proc->GetRem()) {
 				cTime = proc->GetRem();
 				nEvt = new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem());
-//				eQ.push_back(new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem()));
-
 			}
-			else {
+			else
 				nEvt = new Event(proc, RUNNING, BLOCKED, CURRENT_TIME + cTime);
-//				eQ.push_back(new Event(proc, RUNNING, BLOCKED, CURRENT_TIME + cTime));
-			}
 
 			orderedPush(&eQ, nEvt);
 			CURRENT_RUNNING_PROCESS = proc;
 			CALL_SCHEDULER = false;
-
 			cout <<"READY -> RUNNG cb=" << cTime << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
-
 			break;
 		case BLOCKED:
 			proc->AddCPUTime(timeInPrevState);
@@ -121,13 +108,9 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			cTime = myRandom(proc->GetIOBurst());
 			nEvt = new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime);
 			orderedPush(&eQ, nEvt);
-//			eQ.push_back(new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime));
-
 			CURRENT_RUNNING_PROCESS = NULL;
 			CALL_SCHEDULER = true;
-
 			cout << "RUNNG -> BLOCK  ib=" << cTime << " rem=" << proc->GetRem() << endl;
-
 			break;
 		case PREEMPT:
 			CALL_SCHEDULER = true;
@@ -136,17 +119,15 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			proc->AddCPUTime(timeInPrevState);
 			CALL_SCHEDULER = true;
 			CURRENT_RUNNING_PROCESS = NULL;
-//			int pid = proc->GetNum();
 			pSum[proc->GetNum()] = proc;
 			cout << "Done" << endl;
 			break;
 		}
-
 		delete evt;
 		evt = NULL;
 
 		if (CALL_SCHEDULER) {
-			if (!eQ.empty() && eQ.front()->TimeStamp() == CURRENT_TIME) {
+			if ((!eQ.empty() && eQ.front()->TimeStamp() == CURRENT_TIME) || (!inputQ->empty() && inputQ->front()->GetTimeStamp() == CURRENT_TIME) ) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
@@ -155,17 +136,13 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 				CURRENT_RUNNING_PROCESS = sched->get_next_process();
 				if (CURRENT_RUNNING_PROCESS == NULL)
 					continue;
-//				eQ.push_back(new Event(CURRENT_RUNNING_PROCESS, READY, RUNNING, CURRENT_TIME));
 				nEvt = new Event(CURRENT_RUNNING_PROCESS, READY, RUNNING, CURRENT_TIME);
 				orderedPush(&eQ, nEvt);
-//				eQ.push(new Event(CURRENT_RUNNING_PROCESS, CREATED, READY, sched->CurrentProcess()->GetTimeStamp()));
 			}
 		}
 	}
 
-//	totalSum[0] = CURRENT_TIME;
 	cout << sched->Get_SType() << endl;
-//	totalSum[3] = 0;
 
 	for (int i = 0; i < inputSize ; i++ ) {
 		cout << setw(4) << setfill('0') << pSum[i]->GetNum() <<":";

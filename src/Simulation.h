@@ -9,6 +9,8 @@
 #define SIMULATION_H_
 
 #include <iostream>
+#include <list>
+#include <queue>
 #include "Scheduler.h"
 
 class Simulation {

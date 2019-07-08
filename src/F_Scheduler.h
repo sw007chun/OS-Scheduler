@@ -9,10 +9,14 @@
 #define F_SCHEDULER_H_
 
 #include "Scheduler.h"
+#include <queue>
 
 class F_Scheduler : public Scheduler {
+private:
+	queue <Process *> runQ;
 public:
 	F_Scheduler();
+	~F_Scheduler() {};
 	void add_to_queue(Process *p);
 	Process* get_next_process();
 };

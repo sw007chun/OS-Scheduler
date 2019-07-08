@@ -9,25 +9,21 @@
 #define SCHEDULER_H_
 
 #include <iostream>
-#include <queue>
 #include "Process.h"
 using namespace std;
 
 class Scheduler {
 private:
-//	queue <Process *> *allP;
-	queue <Process *> runQ;
-	char * sType;
+//	queue <Process *> runQ;
+	string sType;
 public:
-	Scheduler (char * st);
-	void push(Process *p);
-	Process* pop();
-//	virtual ~Scheduler();
-	Process* CurrentProcess();
+	Scheduler (string st);
+//	void push(Process *p);
+//	Process* pop();
+	virtual ~Scheduler() { };
 	virtual void add_to_queue(Process *p) = 0;
-	Process* get_next_process();
-	char* Get_SType();
-//	Process* Get_New_Process() ;
+	virtual Process* get_next_process() = 0;
+	string Get_SType();
 
 };
 
