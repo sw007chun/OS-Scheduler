@@ -8,9 +8,6 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
-#include <iostream>
-#include <list>
-#include <queue>
 #include "Scheduler.h"
 
 class Simulation {
@@ -19,10 +16,8 @@ private:
 	int ofs;
 public:
 	Simulation(int * rand);
-	void startSim(Scheduler * sched, queue <Process *> *inputQ);
+	void startSim(Scheduler * sched, queue <Process *> *inputQ, bool vOpt);
 	int myRandom (int burst);
 };
-
-
 
 #endif /* SIMULATION_H_ */

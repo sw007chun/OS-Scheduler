@@ -16,19 +16,15 @@ Event::Event(Process * p, int os, int ns, int time) {
 	evt_ts = time;
 	evtProc = p;
 }
-
 Process * Event::evtProcess() {
 	return evtProc;
 }
-
 int Event::GetTimeStamp() {
 	return evt_ts;
 }
-
 int Event::Transition() {
 	return newState;
 }
-
 int Event::GetPrevState() {
 	return oldState;
 }

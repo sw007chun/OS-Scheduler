@@ -11,7 +11,6 @@
 L_Scheduler::L_Scheduler(int q) : Scheduler("LCFS", q) {
 
 }
-
 void L_Scheduler::add_to_queue(Process *p) {
 	runQ.push(p);
 }

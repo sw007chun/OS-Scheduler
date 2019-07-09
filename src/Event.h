@@ -27,5 +27,4 @@ public:
 };
 
 
-
 #endif /* EVENT_H_ */

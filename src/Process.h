@@ -20,7 +20,7 @@ private:
 	int totalCPU;	//total CPU time till now
 	int totalIO;	//total IO time till now
 	int static_prio;	//static priority
-	int dyn_prio;
+	int dyn_prio;	//dynamic priority
 public:
 	Process (int input[]);
 	static int pNum;
@@ -43,6 +43,5 @@ public:
 	void Reduce_Prio();
 	void Reset_Prio();
 };
-
 
 #endif /* PROCESS_H_ */

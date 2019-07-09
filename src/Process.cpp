@@ -21,7 +21,6 @@ Process::Process (int input[]) {
 	totalIO = 0;
 	static_prio = input[4];
 	dyn_prio = static_prio - 1;
-//	cout << state_ts << " " << tCPU << " " << CPU_Burst << " " << IO_Burst << endl;
 }
 
 int Process::GetArrivalTime() {

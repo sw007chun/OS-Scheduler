@@ -58,7 +58,7 @@ int getFuture(list <Event *> *eQ, Process *p ) {
 	return -1;
 }
 
-void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
+void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ, bool vOpt) {
 	int inputSize = inputQ->size();
 	Process **pSum = new Process*[inputSize]; //summary
 	double totalSum[5] = {0.0};
@@ -74,19 +74,19 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 
 	int cTime;
 
-	while (!eQ.empty() || !inputQ->empty()) {
-		if (eQ.empty() || (!inputQ->empty() &&  inputQ->front()->GetTimeStamp() <= eQ.front()->GetTimeStamp())) {
-			evt = new Event(inputQ->front(), CREATED, READY, inputQ->front()->GetTimeStamp());
-			inputQ->pop();
-		} else {
-			evt = eQ.front();
-			eQ.pop_front();
-		}
+	while (!inputQ->empty()) {
+		eQ.push_back(new Event(inputQ->front(), CREATED, READY, inputQ->front()->GetTimeStamp()));
+		inputQ->pop();
+	}
 
+	while (!eQ.empty()) {
+		evt = eQ.front();
+		eQ.pop_front();
 		proc = evt->evtProcess();
 		CURRENT_TIME = evt->GetTimeStamp();
 		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
-		if (evt->GetPrevState() != PREEMPT)
+
+		if (vOpt && evt->GetPrevState() != PREEMPT)
 			cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " ;
 
   		switch(evt->Transition()) {
@@ -103,20 +103,23 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			sched->add_to_queue(proc);
 
 			if (evt->GetPrevState() != PREEMPT) {
-				cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
+				if (vOpt)
+					cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
 				if (sched->Get_SType() == "PREPRIO" && CURRENT_RUNNING_PROCESS != NULL) {
 					int compPrio = proc->GetDynPrio() > CURRENT_RUNNING_PROCESS->GetDynPrio();
 					int compTime = getFuture(&eQ, CURRENT_RUNNING_PROCESS) > CURRENT_TIME;
-					cout << "---> PRIO preemption "<< CURRENT_RUNNING_PROCESS->GetNum() << " by " << proc->GetNum() << " ? ";
-					cout << compPrio << " TS=" << getFuture(&eQ, CURRENT_RUNNING_PROCESS) << " now=" << CURRENT_TIME << ") --> ";
+					if (vOpt) {
+						cout << "---> PRIO preemption "<< CURRENT_RUNNING_PROCESS->GetNum() << " by " << proc->GetNum() << " ? " << compPrio;
+						cout << " TS=" << getFuture(&eQ, CURRENT_RUNNING_PROCESS) << " now=" << CURRENT_TIME << ") --> ";
+					}
 					if (compPrio && compTime) {
-						cout << "YES" << endl;
-//						cout << "Erased: " <<  eQ.front()->evtProcess()->GetNum() << ' ' << eQ.front()->GetPrevState() <<' ' <<eQ.front()->GetTimeStamp()<< ' ' << endl;
+						if (vOpt)
+							cout << "YES" << endl;
 						removeFuture(&eQ, CURRENT_RUNNING_PROCESS);
-						nEvt = new Event(CURRENT_RUNNING_PROCESS, RUNNING, PREEMPT,CURRENT_TIME);
-						orderedPush(&eQ, nEvt);
+						orderedPush(&eQ, new Event(CURRENT_RUNNING_PROCESS, RUNNING, PREEMPT,CURRENT_TIME));
 					} else
-						cout << "NO" <<endl;
+						if (vOpt)
+							cout << "NO" <<endl;
 				}
 			}
 			break;
@@ -140,7 +143,8 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			orderedPush(&eQ, nEvt);
 			CURRENT_RUNNING_PROCESS = proc;
 			CALL_SCHEDULER = false;
-			cout <<"READY -> RUNNG cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
+			if (vOpt)
+				cout <<"READY -> RUNNG cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
 			break;
 		case BLOCKED:
 			proc->AddCPUTime(timeInPrevState);
@@ -150,20 +154,20 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			ioState++;
 
 			cTime = myRandom(proc->GetIOBurst());
-			nEvt = new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime);
-			orderedPush(&eQ, nEvt);
+			orderedPush(&eQ, new Event(proc, BLOCKED, READY, CURRENT_TIME + cTime));
 			CURRENT_RUNNING_PROCESS = NULL;
 			CALL_SCHEDULER = true;
-			cout << "RUNNG -> BLOCK  ib=" << cTime << " rem=" << proc->GetRem() << endl;
+			if (vOpt)
+				cout << "RUNNG -> BLOCK  ib=" << cTime << " rem=" << proc->GetRem() << endl;
 			break;
 		case PREEMPT:
 			proc->AddCPUTime(timeInPrevState);
 			proc->ReduceCPUBurst(timeInPrevState);
-			nEvt = new Event(proc, PREEMPT, READY, CURRENT_TIME);
-			orderedPush(&eQ, nEvt);
+			orderedPush(&eQ, new Event(proc, PREEMPT, READY, CURRENT_TIME));
 			CALL_SCHEDULER = true;
 			CURRENT_RUNNING_PROCESS = NULL;
-			cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
+			if (vOpt)
+				cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
 			if (sched->Get_SType() == "PRIO" ||  sched->Get_SType() == "PREPRIO" )
 				proc->Reduce_Prio();
 			break;
@@ -172,23 +176,23 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			CALL_SCHEDULER = true;
 			CURRENT_RUNNING_PROCESS = NULL;
 			pSum[proc->GetNum()] = proc;
-			cout << "Done" << endl;
+			if (vOpt)
+				cout << "Done" << endl;
 			break;
 		}
 		delete evt;
 		evt = NULL;
 
 		if (CALL_SCHEDULER) {
-			if ((!eQ.empty() && eQ.front()->GetTimeStamp() == CURRENT_TIME) || (!inputQ->empty() && inputQ->front()->GetTimeStamp() == CURRENT_TIME) ) {
+			if (!eQ.empty() && eQ.front()->GetTimeStamp() == CURRENT_TIME)
 				continue;
-			}
+
 			CALL_SCHEDULER = false;
-			if (CURRENT_RUNNING_PROCESS == NULL ) {
+			if (CURRENT_RUNNING_PROCESS == NULL) {
 				CURRENT_RUNNING_PROCESS = sched->get_next_process();
 				if (CURRENT_RUNNING_PROCESS == NULL)
 					continue;
-				nEvt = new Event(CURRENT_RUNNING_PROCESS, READY, RUNNING, CURRENT_TIME);
-				orderedPush(&eQ, nEvt);
+				orderedPush(&eQ, new Event(CURRENT_RUNNING_PROCESS, READY, RUNNING, CURRENT_TIME));
 			}
 		}
 	}

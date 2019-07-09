@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <cstring>
 #include <cstdlib>
-#include <queue>
 #include "Process.h"
 #include "Scheduler.h"
 #include "F_Scheduler.h"
@@ -29,12 +28,14 @@ int main (int argc, char * argv[]) {
 	int quantum = 10000;
 	int maxprio = 4;
 	char *cvalue;
+	bool vOpt = false;
 	ifstream iFile;
 	ifstream rFile;
 
 	while ((c = getopt (argc, argv, "vtes:")) != -1) {
 		switch (c) {
 		case 'v':
+			vOpt = true;
 			break;
 		case 't':
 			break;
@@ -48,11 +49,11 @@ int main (int argc, char * argv[]) {
 				int i = 0;
 				quantum = 0;
 				while (isdigit( cvalue[++i]) )
-						quantum = quantum * 10 + (cvalue[i]-'0');
+					quantum = quantum * 10 + (cvalue[i]-'0');
  				if (cvalue[i] == ':') {
 					maxprio = 0;
 					while (isdigit(cvalue[++i]))
-							maxprio = maxprio * 10 + (cvalue[i]-'0');
+						maxprio = maxprio * 10 + (cvalue[i]-'0');
 				}
 			} else {
 				cout << "Unknown Scheduler spec: -v {FLSRPE}" << endl;
@@ -65,7 +66,6 @@ int main (int argc, char * argv[]) {
 		default:
 			break;
 		}
-//		cout << "c: " << c << ", Type: " << sType << ", Q: " << quantum << ", M: " << maxprio << endl;
 	}
 
 	iFile.open(argv[optind]);
@@ -74,18 +74,16 @@ int main (int argc, char * argv[]) {
 		return  1;
 	}
 
-
-	string readline;
-
 	rFile.open(argv[optind+1]);
 	if (!rFile.is_open()) {
 		cout << "Not a valid inputfile " << argv[optind+1] << endl;
 		return 1;
 	}
 
+	string readline;
 	getline(rFile, readline);
 	int rIndex = atoi(readline.c_str());
-	int * rand = new int[rIndex];
+	int *rand = new int[rIndex];
 
 	for (int i = 0; i < rIndex; i++) {
 		getline(rFile, readline);
@@ -134,9 +132,10 @@ int main (int argc, char * argv[]) {
 		break;
 	}
 
-	sim->startSim(scheduler, &pQ);
+	sim->startSim(scheduler, &pQ, vOpt);
 
 	delete [] rand;
 	delete sim;
+	delete scheduler;
 	return 0;
 }
