@@ -8,7 +8,7 @@
 
 #include "L_Scheduler.h"
 
-L_Scheduler::L_Scheduler(int q) : Scheduler("LCFS", q) {
+L_Scheduler::L_Scheduler(string type, int q) : Scheduler(type, q) {
 
 }
 void L_Scheduler::add_to_queue(Process *p) {

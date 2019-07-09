@@ -7,14 +7,14 @@
 
 #include "S_Scheduler.h"
 
-S_Scheduler::S_Scheduler(int q) : Scheduler("SRTF", q) {
+S_Scheduler::S_Scheduler(string type, int q) : Scheduler(type, q) {
 
 }
 
 void S_Scheduler::add_to_queue(Process *p) {
 	list <Process *>::iterator it;
 	for (it = runQ.begin() ; it != runQ.end(); it++) {
-		if ( (*it)->GetRem() > p->GetRem() ) {
+		if ( (*it)->GetRem() > p->GetRem() ) {	//insert process before process that has longer remaining time
 			runQ.insert(it, p);
 			return;
 		}

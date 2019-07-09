@@ -8,7 +8,6 @@
 #ifndef P_SCHEDULER_H_
 #define P_SCHEDULER_H_
 
-
 #include "Scheduler.h"
 
 class P_Scheduler : public Scheduler {
@@ -16,7 +15,7 @@ private:
 	 list <Process *> *activeQ;
 	 list <Process *> *expiredQ;
 public:
-	P_Scheduler(int q);
+	P_Scheduler(string type, int q);
 	~P_Scheduler();
 	void add_to_queue(Process *p);
 	Process* get_next_process();

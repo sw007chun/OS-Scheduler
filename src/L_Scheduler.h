@@ -12,15 +12,12 @@
 
 class L_Scheduler : public Scheduler {
 private:
-	 stack <Process *> runQ;
+	 stack <Process *> runQ;	//implemented stack rather than queue for LIFO
 public:
-	L_Scheduler(int q);
+	L_Scheduler(string type, int q);
 	~L_Scheduler() {};
 	void add_to_queue(Process *p);
 	Process* get_next_process();
 };
-
-
-
 
 #endif /* L_SCHEDULER_H_ */

@@ -25,7 +25,7 @@ public:
 	virtual void add_to_queue(Process *p) = 0;
 	virtual Process* get_next_process() = 0;
 	void Print_SType();
-	string Get_SType();
+	string Get_SType();	//get scheduler type
 	int Get_Quantum();
 
 };

@@ -2,7 +2,7 @@
  * SchedulerMain.cpp
  *
  *  Created on: Jul 3, 2019
- *      Author: sungw
+ *      Author: Sungwoo Chun
  */
 
 #include <iostream>
@@ -15,9 +15,7 @@
 #include "F_Scheduler.h"
 #include "L_Scheduler.h"
 #include "S_Scheduler.h"
-#include "R_Scheduler.h"
 #include "P_Scheduler.h"
-#include "E_Scheduler.h"
 #include "Simulation.h"
 using namespace std;
 
@@ -25,12 +23,12 @@ int Process::pNum = 0;
 
 int main (int argc, char * argv[]) {
 	int c;
-	int quantum = 10000;
-	int maxprio = 4;
-	char *cvalue;
-	bool vOpt = false;
-	ifstream iFile;
-	ifstream rFile;
+	int quantum = 10000;	//default quantum
+	int maxprio = 4;	//default maxprio
+	char *cvalue;	//variable to store arguments follow -s
+	bool vOpt = false; //variable to save -v option
+	ifstream iFile;	//input file stream
+	ifstream rFile;	//random file strea
 
 	while ((c = getopt (argc, argv, "vtes:")) != -1) {
 		switch (c) {
@@ -48,9 +46,9 @@ int main (int argc, char * argv[]) {
 			else if (cvalue[0] == 'R' || cvalue[0] == 'P' || cvalue[0] == 'E') {
 				int i = 0;
 				quantum = 0;
-				while (isdigit( cvalue[++i]) )
+				while (isdigit(cvalue[++i])) //getting optional quantum value
 					quantum = quantum * 10 + (cvalue[i]-'0');
- 				if (cvalue[i] == ':') {
+ 				if (cvalue[i] == ':') { //getting optional maxprio value
 					maxprio = 0;
 					while (isdigit(cvalue[++i]))
 						maxprio = maxprio * 10 + (cvalue[i]-'0');
@@ -61,7 +59,7 @@ int main (int argc, char * argv[]) {
 			}
 			break;
 		case '?':
-			fprintf (stderr, "Usage: ./sched [-v] inputfile randomfile");
+			fprintf (stderr, "Usage: ./sched [-v] inputfile randomfile\n");
 			return 1;
 		default:
 			break;
@@ -95,6 +93,7 @@ int main (int argc, char * argv[]) {
 	queue <Process *> pQ;
 	int pch[5];
 
+	//creating new process and pushing into the process queue
 	while(getline(iFile, readline)) {
 		char *pArg = new char[readline.length() + 1];
 		strcpy(pArg, readline.c_str());
@@ -109,30 +108,30 @@ int main (int argc, char * argv[]) {
 	}
 
 	Scheduler *scheduler;
-	switch (cvalue[0]) {
+	switch (cvalue[0]) {	//creating scheduler based on argument
 	case 'F':
-		scheduler = new F_Scheduler(quantum);
+		scheduler = new F_Scheduler("FCFS", quantum);
 		break;
 	case 'L':
-		scheduler = new L_Scheduler(quantum);
+		scheduler = new L_Scheduler("LCFS", quantum);
 		break;
 	case 'S':
-		scheduler = new S_Scheduler(quantum);
+		scheduler = new S_Scheduler("SRTF", quantum);
 		break;
 	case 'R':
-		scheduler = new R_Scheduler(quantum);
+		scheduler = new F_Scheduler("RR", quantum);	//RR uses same scheduler as FCFS
 		break;
 	case 'P':
-		scheduler = new P_Scheduler(quantum);
+		scheduler = new P_Scheduler("PRIO", quantum);
 		break;
 	case 'E':
-		scheduler = new E_Scheduler(quantum);
+		scheduler = new P_Scheduler("PREPRIO", quantum);	//PREPRIO uses same scheduler as PRIO
 		break;
 	default:
 		break;
 	}
 
-	sim->startSim(scheduler, &pQ, vOpt);
+	sim->startSim(scheduler, &pQ, vOpt);	//starting simulation
 
 	delete [] rand;
 	delete sim;

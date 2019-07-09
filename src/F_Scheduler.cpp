@@ -7,7 +7,7 @@
 
 #include "F_Scheduler.h"
 
-F_Scheduler::F_Scheduler(int q) : Scheduler("FCFS", q) {
+F_Scheduler::F_Scheduler(string type, int q) : Scheduler(type, q) {
 
 }
 void F_Scheduler::add_to_queue(Process *p) {
