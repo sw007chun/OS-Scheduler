@@ -32,12 +32,30 @@ const char * GetStateName (int state) {
 void orderedPush(list <Event *> *eQ, Event *evt ) {
 	list <Event *>::iterator it;
 	for (it = eQ->begin() ; it != eQ->end(); it++) {
-		if ( (*it)->TimeStamp() > evt->TimeStamp() ) {
+		if ( (*it)->GetTimeStamp() > evt->GetTimeStamp() ) {
 			eQ->insert(it, evt);
 			return;
 		}
 	}
 	eQ->insert(it, evt);
+}
+void removeFuture(list <Event *> *eQ, Process *p ) {
+	list <Event *>::iterator it;
+	for (it = eQ->begin() ; it != eQ->end(); it++) {
+		if ( (*it)->evtProcess()->GetNum() == p->GetNum() ) {
+			eQ->erase(it);
+			return;
+		}
+	}
+}
+int getFuture(list <Event *> *eQ, Process *p ) {
+	list <Event *>::iterator it;
+	for (it = eQ->begin() ; it != eQ->end(); it++) {
+		if ( (*it)->evtProcess()->GetNum() == p->GetNum() ) {
+			return (*it)->GetTimeStamp();
+		}
+	}
+	return -1;
 }
 
 void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
@@ -57,7 +75,7 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 	int cTime;
 
 	while (!eQ.empty() || !inputQ->empty()) {
-		if (eQ.empty() || (!inputQ->empty() &&  inputQ->front()->GetTimeStamp() <= eQ.front()->TimeStamp())) {
+		if (eQ.empty() || (!inputQ->empty() &&  inputQ->front()->GetTimeStamp() <= eQ.front()->GetTimeStamp())) {
 			evt = new Event(inputQ->front(), CREATED, READY, inputQ->front()->GetTimeStamp());
 			inputQ->pop();
 		} else {
@@ -66,7 +84,7 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 		}
 
 		proc = evt->evtProcess();
-		CURRENT_TIME = evt->TimeStamp();
+		CURRENT_TIME = evt->GetTimeStamp();
 		timeInPrevState = CURRENT_TIME - proc->GetTimeStamp();
 		if (evt->GetPrevState() != PREEMPT)
 			cout << CURRENT_TIME << ' ' << proc->GetNum() << ' ' << timeInPrevState << ": " ;
@@ -82,13 +100,25 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			}
 
 			CALL_SCHEDULER = true;
-			if (evt->GetPrevState() != PREEMPT)
-//				cout << "RUNNG -> READY  cb=" << proc->GetLeftCPUBurst() << " rem=" << proc->GetRem() << " prio=" << proc->GetDynPrio() << endl;
-//			else
-				cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
-
 			sched->add_to_queue(proc);
 
+			if (evt->GetPrevState() != PREEMPT) {
+				cout << GetStateName(evt->GetPrevState()) << " -> READY " << endl;
+				if (sched->Get_SType() == "PREPRIO" && CURRENT_RUNNING_PROCESS != NULL) {
+					int compPrio = proc->GetDynPrio() > CURRENT_RUNNING_PROCESS->GetDynPrio();
+					int compTime = getFuture(&eQ, CURRENT_RUNNING_PROCESS) > CURRENT_TIME;
+					cout << "---> PRIO preemption "<< CURRENT_RUNNING_PROCESS->GetNum() << " by " << proc->GetNum() << " ? ";
+					cout << compPrio << " TS=" << getFuture(&eQ, CURRENT_RUNNING_PROCESS) << " now=" << CURRENT_TIME << ") --> ";
+					if (compPrio && compTime) {
+						cout << "YES" << endl;
+//						cout << "Erased: " <<  eQ.front()->evtProcess()->GetNum() << ' ' << eQ.front()->GetPrevState() <<' ' <<eQ.front()->GetTimeStamp()<< ' ' << endl;
+						removeFuture(&eQ, CURRENT_RUNNING_PROCESS);
+						nEvt = new Event(CURRENT_RUNNING_PROCESS, RUNNING, PREEMPT,CURRENT_TIME);
+						orderedPush(&eQ, nEvt);
+					} else
+						cout << "NO" <<endl;
+				}
+			}
 			break;
 		case RUNNING:
 			proc->AddTime(timeInPrevState);
@@ -100,9 +130,8 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 			else
 				cTime = proc->GetLeftCPUBurst();
 
-			if (cTime > sched->Get_Quantum()) {
+			if (cTime > sched->Get_Quantum())
 				nEvt = new Event(proc, RUNNING, PREEMPT, CURRENT_TIME + sched->Get_Quantum());
-			}
 			else if (cTime == proc->GetRem())
 				nEvt = new Event(proc, RUNNING, DONE, CURRENT_TIME + proc->GetRem());
 			else
@@ -150,7 +179,7 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 		evt = NULL;
 
 		if (CALL_SCHEDULER) {
-			if ((!eQ.empty() && eQ.front()->TimeStamp() == CURRENT_TIME) || (!inputQ->empty() && inputQ->front()->GetTimeStamp() == CURRENT_TIME) ) {
+			if ((!eQ.empty() && eQ.front()->GetTimeStamp() == CURRENT_TIME) || (!inputQ->empty() && inputQ->front()->GetTimeStamp() == CURRENT_TIME) ) {
 				continue;
 			}
 			CALL_SCHEDULER = false;
@@ -180,7 +209,11 @@ void Simulation::startSim (Scheduler * sched, queue <Process *> *inputQ) {
 		totalSum[0] += pSum[i]->GetTotalCPU();
 		totalSum[2] += pSum[i]->GetTimeStamp() - pSum[i]->GetArrivalTime();
 		totalSum[3] += pSum[i]->GetTimeStamp() - pSum[i]->GetArrivalTime() - pSum[i]->GetTotalIO() - pSum[i]->GetTotalCPU();
+		delete pSum[i];
 	}
+
+	delete [] pSum;
+
 	totalSum[1] = totalIO;
 	totalSum[4] = inputSize;
 	cout << "SUM: " << CURRENT_TIME ;

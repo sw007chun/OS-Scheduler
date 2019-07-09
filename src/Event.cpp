@@ -21,7 +21,7 @@ Process * Event::evtProcess() {
 	return evtProc;
 }
 
-int Event::TimeStamp() {
+int Event::GetTimeStamp() {
 	return evt_ts;
 }
 

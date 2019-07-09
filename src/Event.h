@@ -21,7 +21,7 @@ private:
 public:
 	Event(Process * p, int s, int time, int trans);
 	Process * evtProcess();
-	int TimeStamp();
+	int GetTimeStamp();
 	int Transition();
 	int GetPrevState();
 };

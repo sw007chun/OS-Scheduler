@@ -1,19 +1,19 @@
 /*
- * P_Scheduler.cpp
+ * E_Scheduler.cpp
  *
  *  Created on: Jul 8, 2019
  *      Author: sungw
  */
 
 
-#include "P_Scheduler.h"
+#include "E_Scheduler.h"
 
-P_Scheduler::P_Scheduler(int q) : Scheduler("PRIO", q) {
+E_Scheduler::E_Scheduler(int q) : Scheduler("PREPRIO", q) {
 	activeQ = new list <Process *>;
 	expiredQ = new list <Process *>;
 }
 
-void P_Scheduler::add_to_queue(Process *p) {
+void E_Scheduler::add_to_queue(Process *p) {
 	list <Process *> *pQ;
 	list <Process *> ::iterator it;
 
@@ -35,7 +35,7 @@ void P_Scheduler::add_to_queue(Process *p) {
 //	cout << activeQ->empty() <<' ' << pQ->empty() << endl;
 }
 
-Process* P_Scheduler::get_next_process() {
+Process* E_Scheduler::get_next_process() {
 //	cout << activeQ->empty() <<' ' << expiredQ->empty() << endl;
 	if (!activeQ->empty()) {
 		Process * p = activeQ->front();
@@ -50,7 +50,8 @@ Process* P_Scheduler::get_next_process() {
 		return NULL;
 }
 
-P_Scheduler::~P_Scheduler() {
+E_Scheduler::~E_Scheduler() {
 	delete activeQ;
 	delete expiredQ;
 }
+

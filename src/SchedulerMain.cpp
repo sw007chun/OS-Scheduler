@@ -18,6 +18,7 @@
 #include "S_Scheduler.h"
 #include "R_Scheduler.h"
 #include "P_Scheduler.h"
+#include "E_Scheduler.h"
 #include "Simulation.h"
 using namespace std;
 
@@ -106,6 +107,7 @@ int main (int argc, char * argv[]) {
 		pch[4] = sim->myRandom(maxprio);
 		Process *p = new Process(pch);
 		pQ.push(p);
+		delete pArg;
 	}
 
 	Scheduler *scheduler;
@@ -125,11 +127,16 @@ int main (int argc, char * argv[]) {
 	case 'P':
 		scheduler = new P_Scheduler(quantum);
 		break;
+	case 'E':
+		scheduler = new E_Scheduler(quantum);
+		break;
 	default:
 		break;
 	}
 
 	sim->startSim(scheduler, &pQ);
 
+	delete [] rand;
+	delete sim;
 	return 0;
 }
